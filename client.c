@@ -28,8 +28,8 @@ int main(int argc, char *argv[])
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0)
 		error(EXIT_FAILURE, 0, "ERROR opening socket");
-	//server = gethostbyname("129.120.151.94"); //IP address of server
-	server = gethostbyname("localhost"); //Both in the same machine [IP address 127.0.0.1]
+	server = gethostbyname("129.120.151.94"); //IP address of server
+	//server = gethostbyname("localhost"); //Both in the same machine [IP address 127.0.0.1]
 	
 	if (server == NULL)
 	{
@@ -45,26 +45,37 @@ int main(int argc, char *argv[])
 	if(connect(sockfd,(struct sockaddr*)&serv_addr,sizeof(serv_addr))<0)
 		error(EXIT_FAILURE, 0, "ERROR connecting the server...");
 
-	//Sending the message to the server
-	printf("\nEnter client's message: ");
-	bzero(buffer,256);
-	scanf("%s", buffer);
-	n = write(sockfd, buffer, strlen(buffer));
-	if (n < 0)
+	int quit = 0;
+	while(quit == 0)
 	{
-		error(EXIT_FAILURE, 0, "ERROR writing to socket");
+		//Sending the message to the server
+		printf("\nEnter message (use quit to end): ");
+		bzero(buffer,256);
+		//scanf("%s", buffer);
+		fgets(buffer,256,stdin);
+		n = write(sockfd, buffer, strlen(buffer));
+		if (n < 0)
+		{
+			error(EXIT_FAILURE, 0, "ERROR writing to socket");
+		}
+		if(strstr(buffer, "quit") == NULL)
+		{
+			//Receiving the message from the client
+			bzero(buffer,256);
+			n = read(sockfd, buffer, 255);
+			if (n < 0)
+				error(EXIT_FAILURE, 0, "ERROR reading from socket");
+			else
+			{
+				printf("The number of vowels present is %s\n", buffer);
+			}
+		}
+		else
+		{
+			printf("Goodbye");
+			quit = 1;
+		}
 	}
-	
-	//Receiving the message from the client
-	bzero(buffer,256);
-	n = read(sockfd, buffer, 255);
-	if (n < 0)
-		error(EXIT_FAILURE, 0, "ERROR reading from socket");
-	else
-	{
-		printf("Server has sent: %s\n", buffer);
-	}
-
 	//Closing the connection
 	close(sockfd);		
 
