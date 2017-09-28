@@ -1,6 +1,7 @@
 /* Compilation: gcc -o server server.c
    Execution  : ./server 5000
    Tutorial followed at: https://www.tutorialspoint.com/unix_sockets/socket_server_example.htm and then expanded upon
+   Threading is probably the better solution for long term but forking is easier
 */
 
 #include <stdio.h>
@@ -20,6 +21,7 @@ int main(int argc, char *argv[])
 			printf("\nPort number is missing...\n");
 			exit(0);
 		}
+		printf("Server has started\n");
     	int sockfd, newsockfd, portno, clilen;
    		struct sockaddr_in serv_addr, cli_addr;
     	char buffer[256]; 
@@ -28,7 +30,7 @@ int main(int argc, char *argv[])
     	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
     	if(sockfd < 0){
-    		printf("ERROR opening socket");
+    		printf("ERROR opening socket\n");
     		exit(1);
     	}
     	//Initialize socket structure
@@ -42,7 +44,7 @@ int main(int argc, char *argv[])
     	//Bind host
     	if(bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
     	{
-    		printf("ERROR on binding");
+    		printf("ERROR on binding\n");
     		exit(1);
     	}
 
@@ -56,7 +58,7 @@ int main(int argc, char *argv[])
     		newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
     		if(newsockfd < 0)
     		{
-    			printf("ERROR on accept");
+    			printf("ERROR on accept\n");
     			exit(1);
     		}
 
@@ -65,13 +67,14 @@ int main(int argc, char *argv[])
 
     		if(pid < 0)
     		{
-    			perror("ERROR on fork");
+    			perror("ERROR on fork\n");
     			exit(1);
     		}
     		if(pid == 0)
     		{
     			//Client Process
     			close(sockfd);
+    			printf("Client Connected\n");
     			CountTheVowels(newsockfd);
     			exit(0);
     		}
@@ -94,10 +97,10 @@ void CountTheVowels(int sock)
 
 		if(n < 0)
 		{
-			perror("ERROR reading from socket");
+			perror("ERROR reading from socket\n");
 			exit(1);
 		}
-		if(strstr(buffer, "quit") == NULL)
+		if(strstr(buffer, "Bye") == NULL)
 		{
 			printf("Sentence recieved: %s\n", buffer);
 
@@ -119,7 +122,7 @@ void CountTheVowels(int sock)
 
 			if( n < 0)
 			{
-				perror("ERROR writing to socket");
+				perror("ERROR writing to socket\n");
 				exit(1);
 			}
 		}

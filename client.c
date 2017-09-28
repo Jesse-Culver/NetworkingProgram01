@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 	portno = atoi(argv[1]);
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0)
-		error(EXIT_FAILURE, 0, "ERROR opening socket");
+		error(EXIT_FAILURE, 0, "ERROR opening socket\n");
 	server = gethostbyname("129.120.151.94"); //IP address of server
 	//server = gethostbyname("localhost"); //Both in the same machine [IP address 127.0.0.1]
 	
@@ -43,22 +43,21 @@ int main(int argc, char *argv[])
 	serv_addr.sin_port = htons(portno);
 	memcpy(&serv_addr.sin_addr, server->h_addr, server->h_length);
 	if(connect(sockfd,(struct sockaddr*)&serv_addr,sizeof(serv_addr))<0)
-		error(EXIT_FAILURE, 0, "ERROR connecting the server...");
+		error(EXIT_FAILURE, 0, "ERROR connecting the server...\n");
 
 	int quit = 0;
 	while(quit == 0)
 	{
 		//Sending the message to the server
-		printf("\nEnter message (use quit to end): ");
+		printf("\nEnter message (use Bye to end): ");
 		bzero(buffer,256);
-		//scanf("%s", buffer);
 		fgets(buffer,256,stdin);
 		n = write(sockfd, buffer, strlen(buffer));
 		if (n < 0)
 		{
 			error(EXIT_FAILURE, 0, "ERROR writing to socket");
 		}
-		if(strstr(buffer, "quit") == NULL)
+		if(strstr(buffer, "Bye") == NULL)
 		{
 			//Receiving the message from the client
 			bzero(buffer,256);
@@ -72,7 +71,7 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			printf("Goodbye");
+			printf("Goodbye\n");
 			quit = 1;
 		}
 	}
